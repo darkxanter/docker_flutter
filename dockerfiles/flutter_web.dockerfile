@@ -1,11 +1,11 @@
 # ----------------------------------------------------------------------------------------
 #                                        Dockerfile
 # ----------------------------------------------------------------------------------------
-# image:       plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-web
+# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-web
 # repository:  https://github.com/plugfox/docker_flutter
 # license:     MIT
 # requires:
-# + plugfox/flutter:<version>
+# + xanter/flutter:<version>
 # authors:
 # + Plague Fox <PlugFox@gmail.com>
 # + Maria Melnik
@@ -16,7 +16,7 @@
 ARG FLUTTER_CHANNEL
 ARG FLUTTER_VERSION
 
-FROM plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}
+FROM xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}
 
 # Setup flutter tools for web developement
 RUN set -eux; dart --disable-analytics \
@@ -24,7 +24,7 @@ RUN set -eux; dart --disable-analytics \
     && flutter precache --universal --web
 
 # Add lables
-LABEL name="plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-web" \
+LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-web" \
       description="Alpine with flutter & dart for web" \
       flutter.channel="${FLUTTER_CHANNEL}" \
       flutter.version="${FLUTTER_VERSION}"

@@ -18,38 +18,38 @@ ifdef FLUTTER_CHANNEL
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter.dockerfile \
 		 --build-arg FLUTTER_CHANNEL=$(FLUTTER_CHANNEL) \
-		 --tag plugfox/flutter:$(FLUTTER_CHANNEL) .
+		 --tag xanter/flutter:$(FLUTTER_CHANNEL) .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_web.dockerfile \
 		 --build-arg FLUTTER_CHANNEL=$(FLUTTER_CHANNEL) \
-		 --tag "plugfox/flutter:$(FLUTTER_CHANNEL)-web" .
+		 --tag "xanter/flutter:$(FLUTTER_CHANNEL)-web" .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_android.dockerfile \
 		 --build-arg FLUTTER_CHANNEL=$(FLUTTER_CHANNEL) \
-		 --tag "plugfox/flutter:$(FLUTTER_CHANNEL)-android" .
+		 --tag "xanter/flutter:$(FLUTTER_CHANNEL)-android" .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_android_warmed.dockerfile \
 		 --build-arg FLUTTER_CHANNEL=$(FLUTTER_CHANNEL) \
-		 --tag "plugfox/flutter:$(FLUTTER_CHANNEL)-android-warmed" .
+		 --tag "xanter/flutter:$(FLUTTER_CHANNEL)-android-warmed" .
 endif
 ifdef FLUTTER_VERSION
 	@echo "BUILD FLUTTER VERSION $(FLUTTER_VERSION)"
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag plugfox/flutter:$(FLUTTER_VERSION) .
+		 --tag xanter/flutter:$(FLUTTER_VERSION) .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_web.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag "plugfox/flutter:$(FLUTTER_VERSION)-web" .
+		 --tag "xanter/flutter:$(FLUTTER_VERSION)-web" .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_android.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag "plugfox/flutter:$(FLUTTER_VERSION)-android" .
+		 --tag "xanter/flutter:$(FLUTTER_VERSION)-android" .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_android_warmed.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag "plugfox/flutter:$(FLUTTER_VERSION)-android-warmed" .
+		 --tag "xanter/flutter:$(FLUTTER_VERSION)-android-warmed" .
 endif
 
 # Отправить собраные образы
@@ -59,17 +59,17 @@ endif
 push:
 ifdef FLUTTER_CHANNEL
 	@echo "PUSH FLUTTER $(FLUTTER_CHANNEL)"
-	@docker push plugfox/flutter:$(FLUTTER_CHANNEL)
-	@docker push plugfox/flutter:$(FLUTTER_CHANNEL)-web
-	@docker push plugfox/flutter:$(FLUTTER_CHANNEL)-android
-	@docker push plugfox/flutter:$(FLUTTER_CHANNEL)-android-warmed
+	@docker push xanter/flutter:$(FLUTTER_CHANNEL)
+	@docker push xanter/flutter:$(FLUTTER_CHANNEL)-web
+	@docker push xanter/flutter:$(FLUTTER_CHANNEL)-android
+	@docker push xanter/flutter:$(FLUTTER_CHANNEL)-android-warmed
 endif
 ifdef FLUTTER_VERSION
 	@echo "PUSH FLUTTER $(FLUTTER_VERSION)"
-	@docker push plugfox/flutter:$(FLUTTER_VERSION)
-	@docker push plugfox/flutter:$(FLUTTER_VERSION)-web
-	@docker push plugfox/flutter:$(FLUTTER_VERSION)-android
-	@docker push plugfox/flutter:$(FLUTTER_VERSION)-android-warmed
+	@docker push xanter/flutter:$(FLUTTER_VERSION)
+	@docker push xanter/flutter:$(FLUTTER_VERSION)-web
+	@docker push xanter/flutter:$(FLUTTER_VERSION)-android
+	@docker push xanter/flutter:$(FLUTTER_VERSION)-android-warmed
 endif
 
 # Перейти в шелл образа
@@ -81,13 +81,13 @@ ifdef FLUTTER_CHANNEL
 	@docker run --rm -it -v $(shell pwd):/home --workdir /home \
 		--user=root:root \
 		--name flutter_$(FLUTTER_CHANNEL)_android_warmed \
-		plugfox/flutter:$(FLUTTER_CHANNEL)-android-warmed /bin/bash
+		xanter/flutter:$(FLUTTER_CHANNEL)-android-warmed /bin/bash
 endif
 ifdef FLUTTER_VERSION
 	@docker run --rm -it -v $(shell pwd):/home --workdir /home \
 		--user=root:root \
 		--name flutter_$(FLUTTER_VERSION)_android_warmed \
-		plugfox/flutter:$(FLUTTER_VERSION)-android-warmed /bin/bash
+		xanter/flutter:$(FLUTTER_VERSION)-android-warmed /bin/bash
 endif
 
 # Авторизоваться
@@ -95,9 +95,9 @@ login:
 	@docker login
 
 # Очистить неиспользуемые образы с меткой
-# family=plugfox/flutter
+# family=xanter/flutter
 prune:
-	@docker image prune -af --filter "label=family=plugfox/flutter"
+	@docker image prune -af --filter "label=family=xanter/flutter"
 
 # Просканировать образ на наличие уязвимостей
 # Запускается с аргументом FLUTTER_CHANNEL или FLUTTER_VERSION
@@ -105,10 +105,10 @@ prune:
 # make scan FLUTTER_VERSION="<ВЕРСИЯ>" e.g. make scan FLUTTER_VERSION="2.5.3"
 scan:
 ifdef FLUTTER_CHANNEL
-	@docker scan plugfox/flutter:$(FLUTTER_CHANNEL)-android-warmed
+	@docker scan xanter/flutter:$(FLUTTER_CHANNEL)-android-warmed
 endif
 ifdef FLUTTER_VERSION
-	@docker scan plugfox/flutter:$(FLUTTER_VERSION)-android-warmed
+	@docker scan xanter/flutter:$(FLUTTER_VERSION)-android-warmed
 endif
 
 # Проверить сборку
@@ -120,11 +120,11 @@ ifdef FLUTTER_CHANNEL
 	@docker run --rm -it -v $(shell pwd)/tools:/home/tools --workdir /home/tools \
 		--user=root:root \
 		--name flutter_$(FLUTTER_CHANNEL)_android_warmed \
-		plugfox/flutter:$(FLUTTER_CHANNEL)-android-warmed sh /home/tools/build_demo_android.sh
+		xanter/flutter:$(FLUTTER_CHANNEL)-android-warmed sh /home/tools/build_demo_android.sh
 endif
 ifdef FLUTTER_VERSION
 	@docker run --rm -it -v $(shell pwd)/tools:/home/tools --workdir /home/tools \
 		--user=root:root \
 		--name flutter_$(FLUTTER_VERSION)_android_warmed \
-		plugfox/flutter:$(FLUTTER_VERSION)-android-warmed sh /home/tools/build_demo_android.sh
+		xanter/flutter:$(FLUTTER_VERSION)-android-warmed sh /home/tools/build_demo_android.sh
 endif

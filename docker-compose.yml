@@ -30,7 +30,7 @@ services:
   # STABLE
 
   flutter-stable:
-    image: plugfox/flutter:stable
+    image: xanter/flutter:stable
     build:
       dockerfile: dockerfiles/flutter.dockerfile
       context: .
@@ -38,7 +38,7 @@ services:
         - FLUTTER_CHANNEL=stable
 
   flutter-stable-web:
-    image: plugfox/flutter:stable-web
+    image: xanter/flutter:stable-web
     build:
       dockerfile: dockerfiles/flutter_web.dockerfile
       context: .
@@ -46,7 +46,7 @@ services:
         - FLUTTER_CHANNEL=stable
 
   flutter-stable-android:
-    image: plugfox/flutter:stable-android
+    image: xanter/flutter:stable-android
     build:
       dockerfile: dockerfiles/flutter_android.dockerfile
       context: .
@@ -54,7 +54,7 @@ services:
         - FLUTTER_CHANNEL=stable
 
   flutter-stable-android-warmed:
-    image: plugfox/flutter:stable-android-warmed
+    image: xanter/flutter:stable-android-warmed
     build:
       dockerfile: dockerfiles/flutter_android_warmed.dockerfile
       context: .
@@ -65,7 +65,7 @@ services:
   # BETA
 
   flutter-beta:
-    image: plugfox/flutter:beta
+    image: xanter/flutter:beta
     build:
       dockerfile: dockerfiles/flutter.dockerfile
       context: .
@@ -73,7 +73,7 @@ services:
         - FLUTTER_CHANNEL=beta
 
   flutter-beta-web:
-    image: plugfox/flutter:beta-web
+    image: xanter/flutter:beta-web
     build:
       dockerfile: dockerfiles/flutter_web.dockerfile
       context: .
@@ -81,7 +81,7 @@ services:
         - FLUTTER_CHANNEL=beta
 
   flutter-beta-android:
-    image: plugfox/flutter:beta-android
+    image: xanter/flutter:beta-android
     build:
       dockerfile: dockerfiles/flutter_android.dockerfile
       context: .
@@ -89,7 +89,7 @@ services:
         - FLUTTER_CHANNEL=beta
 
   flutter-beta-android-warmed:
-    image: plugfox/flutter:beta-android-warmed
+    image: xanter/flutter:beta-android-warmed
     build:
       dockerfile: dockerfiles/flutter_android_warmed.dockerfile
       context: .
@@ -100,7 +100,7 @@ services:
   # MASTER
 
   flutter-master:
-    image: plugfox/flutter:master
+    image: xanter/flutter:master
     build:
       dockerfile: dockerfiles/flutter.dockerfile
       context: .
@@ -108,7 +108,7 @@ services:
         - FLUTTER_CHANNEL=master
 
   flutter-master-web:
-    image: plugfox/flutter:master-web
+    image: xanter/flutter:master-web
     build:
       dockerfile: dockerfiles/flutter_web.dockerfile
       context: .
@@ -116,7 +116,7 @@ services:
         - FLUTTER_CHANNEL=master
 
   flutter-master-android:
-    image: plugfox/flutter:master-android
+    image: xanter/flutter:master-android
     build:
       dockerfile: dockerfiles/flutter_android.dockerfile
       context: .
@@ -124,7 +124,7 @@ services:
         - FLUTTER_CHANNEL=master
 
   flutter-master-android-warmed:
-    image: plugfox/flutter:master-android-warmed
+    image: xanter/flutter:master-android-warmed
     build:
       dockerfile: dockerfiles/flutter_android_warmed.dockerfile
       context: .

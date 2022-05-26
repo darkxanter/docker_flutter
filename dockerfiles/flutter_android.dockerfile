@@ -1,12 +1,12 @@
 # ----------------------------------------------------------------------------------------
 #                                        Dockerfile
 # ----------------------------------------------------------------------------------------
-# image:       plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android
+# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android
 # repository:  https://github.com/plugfox/docker_flutter
 # license:     MIT
 # requires:
 # + alpine:latest
-# + plugfox/flutter:<version>
+# + xanter/flutter:<version>
 # authors:
 # + Plague Fox <PlugFox@gmail.com>
 # + Maria Melnik
@@ -62,7 +62,7 @@ RUN set -eux; \
     done
 
 # Create new clear layer
-FROM plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION} as production
+FROM xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION} as production
 
 USER root
 
@@ -90,7 +90,7 @@ RUN set -eux; apk add --no-cache openjdk11-jdk \
 #RUN find / -xdev | sort > /tmp/after.txt
 
 # Add lables
-LABEL name="plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android" \
+LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android" \
       description="Alpine with flutter & dart for android" \
       flutter.channel="${FLUTTER_CHANNEL}" \
       flutter.version="${FLUTTER_VERSION}" \

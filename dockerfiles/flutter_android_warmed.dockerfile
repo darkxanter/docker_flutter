@@ -1,11 +1,11 @@
 # ----------------------------------------------------------------------------------------
 #                                        Dockerfile
 # ----------------------------------------------------------------------------------------
-# image:       plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android-warmed
+# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android-warmed
 # repository:  https://github.com/plugfox/docker_flutter
 # license:     MIT
 # requires:
-# + plugfox/flutter:<version>-android
+# + xanter/flutter:<version>-android
 # authors:
 # + Plague Fox <PlugFox@gmail.com>
 # + Maria Melnik
@@ -16,7 +16,7 @@
 ARG FLUTTER_CHANNEL=""
 ARG FLUTTER_VERSION=""
 
-FROM plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android as build
+FROM xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android as build
 
 ARG FLUTTER_CHANNEL
 ARG FLUTTER_VERSION
@@ -47,7 +47,7 @@ RUN set -eux; cd "${FLUTTER_HOME}/bin" \
 #RUN cd / && find / -xdev | sort > /tmp/after.txt
 
 # Add lables
-LABEL name="plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android-warmed" \
+LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android-warmed" \
     description="Alpine with flutter & dart for android, warmed up" \
     flutter.channel="${FLUTTER_CHANNEL}" \
     flutter.version="${FLUTTER_VERSION}"

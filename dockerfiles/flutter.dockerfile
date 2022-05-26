@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------------------------
 #                                        Dockerfile
 # ----------------------------------------------------------------------------------------
-# image:       plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}
+# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}
 # repository:  https://github.com/plugfox/docker_flutter
 # license:     MIT
 # requires:
@@ -135,18 +135,18 @@ RUN set -eux; apk --no-cache add bash git curl unzip  \
 #ENV BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
 # Add lables
-LABEL name="plugfox/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}" \
+LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}" \
       description="Alpine OS with flutter & dart" \
       license="MIT" \
       vcs-type="git" \
       vcs-url="https://github.com/plugfox/docker_flutter" \
       github="https://github.com/plugfox/docker_flutter" \
-      dockerhub="https://hub.docker.com/r/plugfox/flutter" \
+      dockerhub="https://hub.docker.com/r/xanter/flutter" \
       maintainer="Plague Fox <plugfox@gmail.com>" \
       authors="@PlugFox,@DoumanAsh,@MariaMelnik,@zs-dima" \
       user="flutter" \
       group="flutter" \
-      family="plugfox/flutter" \
+      family="xanter/flutter" \
       glibc.version="${GLIBC_VERSION}" \
       glibc.url="${GLIBC_URL}" \
       flutter.channel="${FLUTTER_CHANNEL}" \
