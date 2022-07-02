@@ -17,7 +17,7 @@
 ARG FLUTTER_CHANNEL=""
 ARG FLUTTER_VERSION=""
 # ANDROID_SDK_TOOLS_VERSION Comes from https://developer.android.com/studio/#command-tools
-ARG ANDROID_SDK_TOOLS_VERSION=8092744
+ARG ANDROID_SDK_TOOLS_VERSION=8512546
 ARG ANDROID_HOME="/opt/android"
 
 FROM alpine:latest as build
