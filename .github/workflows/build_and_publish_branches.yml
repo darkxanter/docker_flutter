@@ -21,14 +21,25 @@ jobs:
 
       ##########################################
       # BUILD
-      - name: 🏗️ Build all channels
+      # - name: 🏗️ Build all channels
+      #   run: |
+      #     docker compose -f ./docker-compose.yml build --compress --parallel \
+      #         flutter-stable flutter-beta flutter-master \
+      #       && docker compose -f ./docker-compose.yml build --compress --parallel \
+      #         flutter-stable-web flutter-stable-android flutter-beta-web flutter-beta-android flutter-master-web flutter-master-android \
+      #       && docker compose -f ./docker-compose.yml build --compress --parallel \
+      #         flutter-stable-android-warmed flutter-beta-android-warmed flutter-master-android-warmed
+
+      - name: 🏗️ Build stable channel
         run: |
           docker compose -f ./docker-compose.yml build --compress --parallel \
-              flutter-stable flutter-beta flutter-master \
+              flutter-stable \
             && docker compose -f ./docker-compose.yml build --compress --parallel \
-              flutter-stable-web flutter-stable-android flutter-beta-web flutter-beta-android flutter-master-web flutter-master-android \
+              flutter-stable-web flutter-stable-android \
             && docker compose -f ./docker-compose.yml build --compress --parallel \
-              flutter-stable-android-warmed flutter-beta-android-warmed flutter-master-android-warmed
+              flutter-stable-android-warmed 
+
+
 
       ##########################################
       # DEPLOY
