@@ -31,8 +31,14 @@ RUN set -eux; cd "${FLUTTER_HOME}/bin" \
     && dart --disable-analytics \
     && flutter config --no-analytics --enable-android \
     && flutter precache --universal --android \
-    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'emulator' 'extras;google;instantapps' \
-    #&& sdkmanager --sdk_root=${ANDROID_HOME} --install 'platforms;android-30' 'build-tools;29.0.2'  \
+    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'extras;google;instantapps' \
+    && cd /home \
+    && flutter create --pub -a kotlin --project-name warmup --platforms android -t app warmup \
+    && cd warmup \
+    && flutter pub get \
+    && flutter build apk --release --no-pub --shrink --target-platform android-arm,android-arm64,android-x64 \
+    && cd /home && rm -rf warmup \
+    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'platforms;android-31' 'platforms;android-30' 'platforms;android-29' 'platforms;android-28' \
     && sdkmanager --list_installed > /home/sdkmanager-list-installed.txt
 
 # Сборка демо проекта
