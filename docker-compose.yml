@@ -64,69 +64,69 @@ services:
   #############################################################
   # BETA
 
-  flutter-beta:
-    image: xanter/flutter:beta
-    build:
-      dockerfile: dockerfiles/flutter.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=beta
+  # flutter-beta:
+  #   image: xanter/flutter:beta
+  #   build:
+  #     dockerfile: dockerfiles/flutter.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=beta
 
-  flutter-beta-web:
-    image: xanter/flutter:beta-web
-    build:
-      dockerfile: dockerfiles/flutter_web.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=beta
+  # flutter-beta-web:
+  #   image: xanter/flutter:beta-web
+  #   build:
+  #     dockerfile: dockerfiles/flutter_web.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=beta
 
-  flutter-beta-android:
-    image: xanter/flutter:beta-android
-    build:
-      dockerfile: dockerfiles/flutter_android.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=beta
+  # flutter-beta-android:
+  #   image: xanter/flutter:beta-android
+  #   build:
+  #     dockerfile: dockerfiles/flutter_android.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=beta
 
-  flutter-beta-android-warmed:
-    image: xanter/flutter:beta-android-warmed
-    build:
-      dockerfile: dockerfiles/flutter_android_warmed.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=beta
+  # flutter-beta-android-warmed:
+  #   image: xanter/flutter:beta-android-warmed
+  #   build:
+  #     dockerfile: dockerfiles/flutter_android_warmed.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=beta
 
   #############################################################
   # MASTER
 
-  flutter-master:
-    image: xanter/flutter:master
-    build:
-      dockerfile: dockerfiles/flutter.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=master
+  # flutter-master:
+  #   image: xanter/flutter:master
+  #   build:
+  #     dockerfile: dockerfiles/flutter.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=master
 
-  flutter-master-web:
-    image: xanter/flutter:master-web
-    build:
-      dockerfile: dockerfiles/flutter_web.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=master
+  # flutter-master-web:
+  #   image: xanter/flutter:master-web
+  #   build:
+  #     dockerfile: dockerfiles/flutter_web.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=master
 
-  flutter-master-android:
-    image: xanter/flutter:master-android
-    build:
-      dockerfile: dockerfiles/flutter_android.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=master
+  # flutter-master-android:
+  #   image: xanter/flutter:master-android
+  #   build:
+  #     dockerfile: dockerfiles/flutter_android.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=master
 
-  flutter-master-android-warmed:
-    image: xanter/flutter:master-android-warmed
-    build:
-      dockerfile: dockerfiles/flutter_android_warmed.dockerfile
-      context: .
-      args:
-        - FLUTTER_CHANNEL=master
+  # flutter-master-android-warmed:
+  #   image: xanter/flutter:master-android-warmed
+  #   build:
+  #     dockerfile: dockerfiles/flutter_android_warmed.dockerfile
+  #     context: .
+  #     args:
+  #       - FLUTTER_CHANNEL=master
