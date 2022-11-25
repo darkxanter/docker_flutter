@@ -50,11 +50,11 @@ ENV GLIBC_VERSION=$GLIBC_VERSION \
 RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
     && apk --no-cache add bash curl git ca-certificates wget unzip \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub \
-      https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+    https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
     && wget -O /tmp/glibc/glibc.apk \
-      ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk \
+    ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk \
     && wget -O /tmp/glibc/glibc-bin.apk \
-      ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk \
+    ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk \
     && rm -rf /var/lib/apt/lists/* /var/cache/apk/* \
     && echo "flutter:x:101:flutter" >> /etc/group \
     && echo "flutter:x:101:101:Flutter user,,,:/home:/sbin/nologin" >> /etc/passwd
@@ -64,39 +64,39 @@ RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
 # Install & config Flutter
 # Убрал --no-tags тк флатер не может получить текущую версию
 RUN set -eux; if [[ -z "$FLUTTER_VERSION" ]] ; then \
-        git clone -b ${FLUTTER_CHANNEL} --depth 1 "${FLUTTER_URL}.git" "${FLUTTER_ROOT}" ; \
+    git clone -b ${FLUTTER_CHANNEL} --depth 1 "${FLUTTER_URL}.git" "${FLUTTER_ROOT}" ; \
     else \
-        git clone -b ${FLUTTER_VERSION} --depth 1 "${FLUTTER_URL}.git" "${FLUTTER_ROOT}" ; \
+    git clone -b ${FLUTTER_VERSION} --depth 1 "${FLUTTER_URL}.git" "${FLUTTER_ROOT}" ; \
     fi \
-        && cd "${FLUTTER_ROOT}" \
-        && git gc --prune=all \
-        && cd / \
-        && mv /root /home/
+    && cd "${FLUTTER_ROOT}" \
+    && git gc --prune=all \
+    && cd / \
+    && mv /root /home/
 
 # Create system dependencies
 RUN set -eux; for f in \
-        /etc/ssl/certs \
-        /usr/share/ca-certificates \
-        /etc/apk/keys \
-        /etc/group \
-        /etc/passwd \
+    /etc/ssl/certs \
+    /usr/share/ca-certificates \
+    /etc/apk/keys \
+    /etc/group \
+    /etc/passwd \
     ; do \
-        dir="$(dirname "$f")"; \
-        mkdir -p "/build_system_dependencies$dir"; \
-        cp --archive --link --dereference --no-target-directory "$f" "/build_system_dependencies$f"; \
+    dir="$(dirname "$f")"; \
+    mkdir -p "/build_system_dependencies$dir"; \
+    cp --archive --link --dereference --no-target-directory "$f" "/build_system_dependencies$f"; \
     done
 
 # Create flutter dependencies
 RUN set -eux; \
     for f in \
-        ${FLUTTER_HOME} \
-        ${PUB_CACHE} \
-        /home \
-        /tmp/glibc \
+    ${FLUTTER_HOME} \
+    ${PUB_CACHE} \
+    /home \
+    /tmp/glibc \
     ; do \
-        dir="$(dirname "$f")"; \
-        mkdir -p "/build_flutter_dependencies$dir"; \
-        cp --archive --link --dereference --no-target-directory "$f" "/build_flutter_dependencies$f"; \
+    dir="$(dirname "$f")"; \
+    mkdir -p "/build_flutter_dependencies$dir"; \
+    cp --archive --link --dereference --no-target-directory "$f" "/build_flutter_dependencies$f"; \
     done
 
 # Create new clear layer
@@ -123,37 +123,37 @@ COPY --from=build /build_system_dependencies/ /
 COPY --chown=101:101 --from=build /build_flutter_dependencies/ /
 
 # Install linux dependency and utils
-RUN set -eux; apk --no-cache add bash git curl unzip  \
-                            /tmp/glibc/glibc.apk \
-                            /tmp/glibc/glibc-bin.apk \
+RUN set -eux; apk --no-cache add --force-overwrite bash git curl unzip  \
+    /tmp/glibc/glibc.apk \
+    /tmp/glibc/glibc-bin.apk \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
-              /usr/share/man/* /usr/share/doc
-    #&& git config --global user.email "flutter@dart.dev" \
-    #&& git config --global user.name "Flutter" \
-    #&& git config --global --add safe.directory /opt/flutter
+    /usr/share/man/* /usr/share/doc
+#&& git config --global user.email "flutter@dart.dev" \
+#&& git config --global user.name "Flutter" \
+#&& git config --global --add safe.directory /opt/flutter
 
 #ENV BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
 # Add lables
 LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}" \
-      description="Alpine OS with flutter & dart" \
-      license="MIT" \
-      vcs-type="git" \
-      vcs-url="https://github.com/plugfox/docker_flutter" \
-      github="https://github.com/plugfox/docker_flutter" \
-      dockerhub="https://hub.docker.com/r/xanter/flutter" \
-      maintainer="Plague Fox <plugfox@gmail.com>" \
-      authors="@PlugFox,@DoumanAsh,@MariaMelnik,@zs-dima" \
-      user="flutter" \
-      group="flutter" \
-      family="xanter/flutter" \
-      glibc.version="${GLIBC_VERSION}" \
-      glibc.url="${GLIBC_URL}" \
-      flutter.channel="${FLUTTER_CHANNEL}" \
-      flutter.version="${FLUTTER_VERSION}" \
-      flutter.home="${FLUTTER_HOME}" \
-      flutter.cache="${PUB_CACHE}" \
-      flutter.url="${FLUTTER_URL}"
+    description="Alpine OS with flutter & dart" \
+    license="MIT" \
+    vcs-type="git" \
+    vcs-url="https://github.com/plugfox/docker_flutter" \
+    github="https://github.com/plugfox/docker_flutter" \
+    dockerhub="https://hub.docker.com/r/xanter/flutter" \
+    maintainer="Plague Fox <plugfox@gmail.com>" \
+    authors="@PlugFox,@DoumanAsh,@MariaMelnik,@zs-dima" \
+    user="flutter" \
+    group="flutter" \
+    family="xanter/flutter" \
+    glibc.version="${GLIBC_VERSION}" \
+    glibc.url="${GLIBC_URL}" \
+    flutter.channel="${FLUTTER_CHANNEL}" \
+    flutter.version="${FLUTTER_VERSION}" \
+    flutter.home="${FLUTTER_HOME}" \
+    flutter.cache="${PUB_CACHE}" \
+    flutter.url="${FLUTTER_URL}"
 
 # User by default
 USER flutter
