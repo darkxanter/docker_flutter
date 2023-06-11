@@ -8,6 +8,10 @@ all:
 	@echo make push  FLUTTER_CHANNEL="stable"
 	@echo make shell FLUTTER_CHANNEL="stable"
 
+ifdef FLUTTER_VERSION
+FLUTTER_VERSION_MAJOR_MINOR := $(basename $(FLUTTER_VERSION))
+endif
+
 # Собрать образы соответсвующего канала или версии
 # Запускается с аргументом FLUTTER_CHANNEL или FLUTTER_VERSION
 # make build FLUTTER_CHANNEL="<КАНАЛ>" e.g. make build FLUTTER_CHANNEL="stable"
@@ -37,19 +41,27 @@ ifdef FLUTTER_VERSION
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag xanter/flutter:$(FLUTTER_VERSION) .
+		 --tag xanter/flutter:$(FLUTTER_VERSION) \
+		 --tag xanter/flutter:$(FLUTTER_VERSION_MAJOR_MINOR) \
+		 .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_web.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag "xanter/flutter:$(FLUTTER_VERSION)-web" .
+		 --tag "xanter/flutter:$(FLUTTER_VERSION)-web" \
+		 --tag "xanter/flutter:$(FLUTTER_VERSION_MAJOR_MINOR)-web" \
+		 .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_android.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag "xanter/flutter:$(FLUTTER_VERSION)-android" .
+		 --tag "xanter/flutter:$(FLUTTER_VERSION)-android" \
+		 --tag "xanter/flutter:$(FLUTTER_VERSION_MAJOR_MINOR)-android" \
+		 .
 	@docker build --no-cache --force-rm --compress \
 		 --file ./dockerfiles/flutter_android_warmed.dockerfile \
 		 --build-arg FLUTTER_VERSION=$(FLUTTER_VERSION) \
-		 --tag "xanter/flutter:$(FLUTTER_VERSION)-android-warmed" .
+		 --tag "xanter/flutter:$(FLUTTER_VERSION)-android-warmed" \
+		 --tag "xanter/flutter:$(FLUTTER_VERSION_MAJOR_MINOR)-android-warmed" \
+		 .
 endif
 
 # Отправить собраные образы
@@ -66,10 +78,10 @@ ifdef FLUTTER_CHANNEL
 endif
 ifdef FLUTTER_VERSION
 	@echo "PUSH FLUTTER $(FLUTTER_VERSION)"
-	@docker push xanter/flutter:$(FLUTTER_VERSION)
-	@docker push xanter/flutter:$(FLUTTER_VERSION)-web
-	@docker push xanter/flutter:$(FLUTTER_VERSION)-android
-	@docker push xanter/flutter:$(FLUTTER_VERSION)-android-warmed
+	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)
+	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-web
+	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-android
+	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-android-warmed
 endif
 
 # Перейти в шелл образа
