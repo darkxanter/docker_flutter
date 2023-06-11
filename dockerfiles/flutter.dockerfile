@@ -48,7 +48,7 @@ ENV GLIBC_VERSION=$GLIBC_VERSION \
 
 # Install linux dependency and utils
 RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
-    && apk --no-cache add bash curl git ca-certificates wget unzip \
+    && apk --no-cache add bash curl git ca-certificates wget unzip sudo \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub \
     https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
     && wget -O /tmp/glibc/glibc.apk \
@@ -56,6 +56,7 @@ RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
     && wget -O /tmp/glibc/glibc-bin.apk \
     ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk \
     && rm -rf /var/lib/apt/lists/* /var/cache/apk/* \
+    && echo "flutter ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/flutter \
     && echo "flutter:x:101:flutter" >> /etc/group \
     && echo "flutter:x:101:101:Flutter user,,,:/home:/sbin/nologin" >> /etc/passwd
 
