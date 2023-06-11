@@ -48,7 +48,7 @@ ENV GLIBC_VERSION=$GLIBC_VERSION \
 
 # Install linux dependency and utils
 RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
-    && apk --no-cache add bash curl git ca-certificates wget unzip sudo \
+    && apk --no-cache add bash curl git ca-certificates wget unzip \
     && wget -q -O /etc/apk/keys/sgerrand.rsa.pub \
     https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
     && wget -O /tmp/glibc/glibc.apk \
@@ -56,7 +56,6 @@ RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
     && wget -O /tmp/glibc/glibc-bin.apk \
     ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk \
     && rm -rf /var/lib/apt/lists/* /var/cache/apk/* \
-    && echo "flutter ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/flutter \
     && echo "flutter:x:101:flutter" >> /etc/group \
     && echo "flutter:x:101:101:Flutter user,,,:/home:/sbin/nologin" >> /etc/passwd
 
@@ -124,11 +123,12 @@ COPY --from=build /build_system_dependencies/ /
 COPY --chown=101:101 --from=build /build_flutter_dependencies/ /
 
 # Install linux dependency and utils
-RUN set -eux; apk --no-cache add --force-overwrite bash git curl unzip  \
+RUN set -eux; apk --no-cache add --force-overwrite bash git curl unzip sudo \
     /tmp/glibc/glibc.apk \
     /tmp/glibc/glibc-bin.apk \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
-    /usr/share/man/* /usr/share/doc
+    /usr/share/man/* /usr/share/doc \
+    && echo "flutter ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/flutter
 #&& git config --global user.email "flutter@dart.dev" \
 #&& git config --global user.name "Flutter" \
 #&& git config --global --add safe.directory /opt/flutter
