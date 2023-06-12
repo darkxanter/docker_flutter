@@ -78,10 +78,11 @@ ifdef FLUTTER_CHANNEL
 endif
 ifdef FLUTTER_VERSION
 	@echo "PUSH FLUTTER $(FLUTTER_VERSION)"
-	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)
-	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-web
-	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-android
-	@docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-android-warmed
+	@docker push --all-tags xanter/flutter
+	# @docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)
+	# @docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-web
+	# @docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-android
+	# @docker push --all-tags xanter/flutter:$(FLUTTER_VERSION)-android-warmed
 endif
 
 # Перейти в шелл образа
