@@ -19,10 +19,11 @@ ARG FLUTTER_HOME="/opt/flutter"
 ARG PUB_CACHE="/var/tmp/.pub_cache"
 ARG FLUTTER_URL="https://github.com/flutter/flutter"
 # "2.34-r0" - does not properly work
-ARG GLIBC_VERSION="2.29-r0"
+ARG GLIBC_VERSION="2.35-r1"
 ARG GLIBC_URL="https://github.com/sgerrand/alpine-pkg-glibc"
+ARG ALPINE_VERSION="3.19"
 
-FROM alpine:latest as build
+FROM alpine:$ALPINE_VERSION as build
 
 USER root
 
@@ -33,6 +34,7 @@ ARG PUB_CACHE
 ARG FLUTTER_URL
 ARG GLIBC_VERSION
 ARG GLIBC_URL
+ARG ALPINE_VERSION
 
 WORKDIR /
 
@@ -100,7 +102,7 @@ RUN set -eux; \
     done
 
 # Create new clear layer
-FROM alpine:latest as production
+FROM alpine:$ALPINE_VERSION as production
 
 ARG FLUTTER_CHANNEL
 ARG FLUTTER_VERSION
@@ -109,6 +111,7 @@ ARG PUB_CACHE
 ARG FLUTTER_URL
 ARG GLIBC_VERSION
 ARG GLIBC_URL
+ARG ALPINE_VERSION
 
 # Add enviroment variables
 ENV FLUTTER_HOME=$FLUTTER_HOME \
@@ -140,11 +143,11 @@ LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}" \
     description="Alpine OS with flutter & dart" \
     license="MIT" \
     vcs-type="git" \
-    vcs-url="https://github.com/plugfox/docker_flutter" \
-    github="https://github.com/plugfox/docker_flutter" \
+    vcs-url="https://github.com/xanter/docker_flutter" \
+    github="https://github.com/xanter/docker_flutter" \
     dockerhub="https://hub.docker.com/r/xanter/flutter" \
-    maintainer="Plague Fox <plugfox@gmail.com>" \
-    authors="@PlugFox,@DoumanAsh,@MariaMelnik,@zs-dima" \
+    # maintainer="Plague Fox <plugfox@gmail.com>" \
+    authors="@PlugFox,@DoumanAsh,@MariaMelnik,@zs-dima,@darkxanter" \
     user="flutter" \
     group="flutter" \
     family="xanter/flutter" \

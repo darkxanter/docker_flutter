@@ -16,11 +16,12 @@
 
 ARG FLUTTER_CHANNEL=""
 ARG FLUTTER_VERSION=""
+ARG ALPINE_VERSION="3.19"
 # ANDROID_SDK_TOOLS_VERSION Comes from https://developer.android.com/studio/#command-tools
 ARG ANDROID_SDK_TOOLS_VERSION=8512546
 ARG ANDROID_HOME="/opt/android"
 
-FROM alpine:latest as build
+FROM alpine:$ALPINE_VERSION as build
 
 USER root
 
@@ -36,7 +37,7 @@ ENV ANDROID_HOME=$ANDROID_HOME \
     PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
 
 # Install linux dependency and utils
-RUN set -eux; apk --no-cache add bash curl wget unzip openjdk11-jdk \
+RUN set -eux; apk --no-cache add bash curl wget unzip openjdk17-jdk \
     && rm -rf /tmp/* /var/cache/apk/* \
     && mkdir -p ${ANDROID_HOME}/cmdline-tools /root/.android
 
@@ -53,12 +54,12 @@ RUN set -eux; wget -q https://dl.google.com/android/repository/commandlinetools-
 # Create android dependencies
 RUN set -eux; \
     for f in \
-        ${ANDROID_HOME} \
-        /home \
+    ${ANDROID_HOME} \
+    /home \
     ; do \
-        dir="$(dirname "$f")"; \
-        mkdir -p "/build_android_dependencies$dir"; \
-        cp --archive --link --dereference --no-target-directory "$f" "/build_android_dependencies$f"; \
+    dir="$(dirname "$f")"; \
+    mkdir -p "/build_android_dependencies$dir"; \
+    cp --archive --link --dereference --no-target-directory "$f" "/build_android_dependencies$f"; \
     done
 
 # Create new clear layer
@@ -83,18 +84,18 @@ COPY --chown=101:101 --from=build /build_android_dependencies/ /
 #RUN mkdir -p /tmp && find / -xdev | sort > /tmp/before.txt
 
 # Init android dependency and utils
-RUN set -eux; apk add --no-cache openjdk11-jdk \
+RUN set -eux; apk add --no-cache openjdk17-jdk \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
-      /usr/share/man/* /usr/share/doc
+    /usr/share/man/* /usr/share/doc
 
 #RUN find / -xdev | sort > /tmp/after.txt
 
 # Add lables
 LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android" \
-      description="Alpine with flutter & dart for android" \
-      flutter.channel="${FLUTTER_CHANNEL}" \
-      flutter.version="${FLUTTER_VERSION}" \
-      android.home="${ANDROID_HOME}"
+    description="Alpine with flutter & dart for android" \
+    flutter.channel="${FLUTTER_CHANNEL}" \
+    flutter.version="${FLUTTER_VERSION}" \
+    android.home="${ANDROID_HOME}"
 
 # User by default
 USER flutter

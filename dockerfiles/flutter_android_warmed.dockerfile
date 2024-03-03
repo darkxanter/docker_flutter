@@ -31,7 +31,14 @@ RUN set -eux; cd "${FLUTTER_HOME}/bin" \
     && dart --disable-analytics \
     && flutter config --no-analytics --enable-android \
     && flutter precache --universal --android \
-    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'extras;google;instantapps' 'platforms;android-33' 'platforms;android-32' 'platforms;android-31' 'platforms;android-30' 'platforms;android-29' 'platforms;android-28' \
+    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'extras;google;instantapps' \ 
+    'platforms;android-34' \
+    'platforms;android-33' \ 
+    'platforms;android-32' \ 
+    'platforms;android-31' \ 
+    'platforms;android-30' \ 
+    'platforms;android-29' \
+    'platforms;android-28' \
     && cd /home \
     && flutter create --pub -a kotlin --project-name warmup --platforms android -t app warmup \
     && cd warmup \
@@ -40,6 +47,7 @@ RUN set -eux; cd "${FLUTTER_HOME}/bin" \
     && java -Dorg.gradle.appname=gradlew -classpath /home/warmup/android/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain --stop \
     && cd /home && rm -rf warmup .gradle \
     && sdkmanager --list_installed > /home/sdkmanager-list-installed.txt
+
 
 # Сборка демо проекта
 #RUN set -eux; cd "/home/" \
