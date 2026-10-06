@@ -24,8 +24,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: docker/setup-buildx-action@v4
-      - name: Resolve current stable revision
-        run: bash tools/image.sh resolve >> "$GITHUB_ENV"
+      - name: Resolve current stable release
+        run: bash tools/image.sh resolve-stable >> "$GITHUB_ENV"
       - name: Validate build configuration
         run: |
           python3 -m unittest discover -s tests -p 'test_*.py'

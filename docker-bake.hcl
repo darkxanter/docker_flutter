@@ -7,6 +7,7 @@ variable "IMAGE_TAG" {
   default = FLUTTER_VERSION != "" ? FLUTTER_VERSION : (FLUTTER_CHANNEL != "" ? FLUTTER_CHANNEL : "stable")
 }
 variable "IMAGE_MINOR_TAG" { default = "" }
+variable "IMAGE_CHANNEL_TAG" { default = "" }
 variable "UBUNTU_VERSION" { default = "24.04" }
 variable "ANDROID_SDK_TOOLS_VERSION" { default = "11076708" }
 variable "ANDROID_PLATFORM_VERSION" { default = "36" }
@@ -17,7 +18,8 @@ function "image_tags" {
   params = [suffix]
   result = compact([
     "${IMAGE_REPOSITORY}:${IMAGE_TAG}${suffix}",
-    IMAGE_MINOR_TAG != "" ? "${IMAGE_REPOSITORY}:${IMAGE_MINOR_TAG}${suffix}" : ""
+    IMAGE_MINOR_TAG != "" ? "${IMAGE_REPOSITORY}:${IMAGE_MINOR_TAG}${suffix}" : "",
+    IMAGE_CHANNEL_TAG != "" ? "${IMAGE_REPOSITORY}:${IMAGE_CHANNEL_TAG}${suffix}" : ""
   ])
 }
 

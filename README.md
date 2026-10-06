@@ -4,7 +4,7 @@
 [![Docker Hub](https://img.shields.io/badge/Docker-Hub-2496ed.svg)](https://hub.docker.com/r/xanter/flutter/tags)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
 
-Ubuntu 24.04 images for Flutter and Dart, adapted from [PlugFox/docker_flutter](https://github.com/PlugFox/docker_flutter). Published images target **linux/amd64**. The stable channel is rebuilt every Monday; version builds are triggered manually.
+Ubuntu 24.04 images for Flutter and Dart, adapted from [PlugFox/docker_flutter](https://github.com/PlugFox/docker_flutter). Published images target **linux/amd64**. The latest stable release is detected and rebuilt every Monday; a specific version can also be built manually.
 
 ## Image variants
 
@@ -16,6 +16,25 @@ Ubuntu 24.04 images for Flutter and Dart, adapted from [PlugFox/docker_flutter](
 | `<version>-android-warmed` | Android image, SDK components and Gradle dependencies downloaded by a release demo build |
 
 For example: `xanter/flutter:3.35.7-android-warmed`. Stable version builds also produce major.minor aliases such as `3.35-android-warmed`. Prerelease versions receive only their full version tags.
+
+### Automatic stable releases
+
+The scheduled workflow and its manual **Run workflow** button resolve the current
+`stable` commit and its release tag from the official Flutter Git repository.
+The same checked images receive full-version, major.minor and `stable` tags. For
+example, a detected `3.47.6` release publishes `3.47.6`, `3.47` and `stable`, plus
+the corresponding `-web`, `-android` and `-android-warmed` variants.
+
+Resolution uses one Git reference snapshot, including peeled annotated tags.
+Prerelease tags and tags pointing at other commits are excluded. If several
+release tags point at the stable commit, the highest numeric version is selected.
+If the commit has no release tag yet, the workflow stops with an error so it can
+be retried after tagging. The Docker build verifies the selected SDK commit.
+
+The separate version workflow publishes the requested version and its minor
+aliases; automatic `stable` aliases belong to the stable-release workflow.
+For inspection, `bash tools/image.sh resolve-stable` prints the resolved build
+variables and requires Python 3 in addition to Bash and Git.
 
 ### Migration from Alpine
 

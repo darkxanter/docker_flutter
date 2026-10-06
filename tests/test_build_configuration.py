@@ -18,6 +18,7 @@ class BuildConfigurationTests(unittest.TestCase):
             FLUTTER_CHANNEL="",
             FLUTTER_REVISION=REVISION,
             IMAGE_REPOSITORY=REPOSITORY,
+            IMAGE_CHANNEL_TAG="",
             CI_CACHE="false",
         )
         env.update(overrides)
@@ -54,6 +55,17 @@ class BuildConfigurationTests(unittest.TestCase):
     def test_prerelease_has_no_release_alias(self):
         targets = self.config(FLUTTER_VERSION="3.36.0-0.1.pre")
         self.assertEqual(targets["base"]["tags"], [f"{REPOSITORY}:3.36.0-0.1.pre"])
+
+    def test_stable_release_has_all_three_aliases(self):
+        targets = self.config(FLUTTER_VERSION="3.47.6", IMAGE_CHANNEL_TAG="stable")
+        for variant, target in targets.items():
+            suffix = "" if variant == "base" else f"-{variant}"
+            self.assertEqual(set(target["tags"]), {
+                f"{REPOSITORY}:3.47.6{suffix}",
+                f"{REPOSITORY}:3.47{suffix}",
+                f"{REPOSITORY}:stable{suffix}",
+            })
+        self.assertEqual(targets["base"]["args"]["FLUTTER_REVISION"], REVISION)
 
     def test_channel_revision_reaches_base(self):
         for revision in ("a" * 40, "b" * 40):
@@ -92,6 +104,9 @@ class BuildConfigurationTests(unittest.TestCase):
             {"IMAGE_REPOSITORY": "registry/name:tag"},
             {"FLUTTER_REVISION": "not-a-revision"},
             {"CI_CACHE": "sometimes"},
+            {"IMAGE_CHANNEL_TAG": "stable;true"},
+            {"FLUTTER_VERSION": "3.36.0-0.1.pre", "IMAGE_CHANNEL_TAG": "stable"},
+            {"FLUTTER_VERSION": "", "IMAGE_CHANNEL_TAG": "stable"},
         ]
         for overrides in invalid:
             with self.subTest(overrides=overrides):
@@ -107,6 +122,7 @@ class BuildConfigurationTests(unittest.TestCase):
         self.assertEqual(values["FLUTTER_CHANNEL"], "")
         self.assertEqual(values["IMAGE_TAG"], "3.35.7")
         self.assertEqual(values["FLUTTER_REVISION"], REVISION)
+        self.assertEqual(values.get("IMAGE_CHANNEL_TAG"), "")
 
     def test_make_commands_use_shared_tool(self):
         for target in ("build", "push"):
