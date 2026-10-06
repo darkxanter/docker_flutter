@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@v6
+      - uses: docker/setup-buildx-action@v4
       - name: Resolve current stable revision
         run: bash tools/image.sh resolve >> "$GITHUB_ENV"
       - name: Validate build configuration
@@ -31,14 +31,14 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_*.py'
           docker compose config --quiet
       - name: Build and load all variants
-        uses: docker/bake-action@v6
+        uses: docker/bake-action@v7
         with:
           files: docker-bake.hcl
           load: true
       - name: Verify images
         run: make check
       - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
           password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
