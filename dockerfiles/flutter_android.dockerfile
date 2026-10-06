@@ -32,12 +32,13 @@ ARG ANDROID_HOME
 WORKDIR /
 
 ENV ANDROID_HOME=$ANDROID_HOME \
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
     ANDROID_SDK_ROOT=$ANDROID_HOME \
     ANDROID_TOOLS_ROOT=$ANDROID_HOME \
     PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
 
 # Install linux dependency and utils
-RUN set -eux; apk --no-cache add bash curl wget unzip openjdk17-jdk \
+RUN set -eux; apk --no-cache add bash curl wget unzip openjdk21-jdk \
     && rm -rf /tmp/* /var/cache/apk/* \
     && mkdir -p ${ANDROID_HOME}/cmdline-tools /root/.android
 
@@ -74,6 +75,7 @@ ARG ANDROID_HOME
 
 # Add enviroment variables
 ENV ANDROID_HOME=$ANDROID_HOME \
+    JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
     ANDROID_SDK_ROOT=$ANDROID_HOME \
     ANDROID_TOOLS_ROOT=$ANDROID_HOME \
     PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
@@ -84,7 +86,7 @@ COPY --chown=101:101 --from=build /build_android_dependencies/ /
 #RUN mkdir -p /tmp && find / -xdev | sort > /tmp/before.txt
 
 # Init android dependency and utils
-RUN set -eux; apk add --no-cache openjdk17-jdk \
+RUN set -eux; apk add --no-cache openjdk21-jdk \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
     /usr/share/man/* /usr/share/doc
 
