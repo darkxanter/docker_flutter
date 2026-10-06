@@ -1,69 +1,23 @@
-# ----------------------------------------------------------------------------------------
-#                                        Dockerfile
-# ----------------------------------------------------------------------------------------
-# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android-warmed
-# repository:  https://github.com/plugfox/docker_flutter
-# license:     MIT
-# requires:
-# + xanter/flutter:<version>-android
-# authors:
-# + Plague Fox <PlugFox@gmail.com>
-# + Maria Melnik
-# + Dmitri Z <z-dima@live.ru>
-# + DoumanAsh <douman@gmx.se>
-# ----------------------------------------------------------------------------------------
-
+# syntax=docker/dockerfile:1
 ARG FLUTTER_CHANNEL=""
 ARG FLUTTER_VERSION=""
+ARG BASE_IMAGE=xanter/flutter:${FLUTTER_VERSION:-${FLUTTER_CHANNEL:-stable}}-android
+FROM ${BASE_IMAGE} AS production
 
-FROM xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android as build
+USER flutter
+WORKDIR /home
+RUN set -eux; \
+    flutter create --pub -a kotlin --project-name warmup --platforms android -t app warmup; \
+    cd warmup; \
+    flutter build apk --release --no-pub --shrink --target-platform android-arm,android-arm64,android-x64; \
+    android/gradlew -p android --stop; \
+    cd /home; \
+    rm -rf warmup .gradle/daemon; \
+    find .gradle -type f -name '*.lock' -delete; \
+    sdkmanager --list_installed > /home/sdkmanager-list-installed.txt
 
-ARG FLUTTER_CHANNEL
-ARG FLUTTER_VERSION
+LABEL org.opencontainers.image.title="Flutter Android warmed" \
+    org.opencontainers.image.description="Flutter Android with SDK platforms and warmed Gradle dependencies"
 
 WORKDIR /
-
-#RUN mkdir -p /tmp && find / -xdev | sort > /tmp/before.txt
-
-# Init android dependency and utils & prebuild app
-RUN set -eux; cd "${FLUTTER_HOME}/bin" \
-    && yes "y" | flutter doctor --android-licenses \
-    && dart --disable-analytics \
-    && flutter config --no-analytics --enable-android \
-    && flutter precache --universal --android \
-    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'extras;google;instantapps' \
-    'platforms;android-36' \
-    'platforms;android-35' \
-    'platforms;android-34' \
-    'platforms;android-33' \
-    'platforms;android-32' \
-    'platforms;android-31' \
-    'platforms;android-30' \
-    'platforms;android-29' \
-    'platforms;android-28' \
-    && cd /home \
-    && flutter create --pub -a kotlin --project-name warmup --platforms android -t app warmup \
-    && cd warmup \
-    && flutter pub get \
-    && flutter build apk --release --no-pub --shrink --target-platform android-arm,android-arm64,android-x64 \
-    && java -Dorg.gradle.appname=gradlew -classpath /home/warmup/android/gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain --stop \
-    && cd /home && rm -rf warmup .gradle \
-    && sdkmanager --list_installed > /home/sdkmanager-list-installed.txt
-
-
-# Сборка демо проекта
-#RUN set -eux; cd "/home/" \
-#    && flutter create --pub -a kotlin --project-name warmup --platforms android -t app warmup \
-#    && cd warmup \
-#    && flutter pub get \
-#    && flutter pub upgrade --major-versions \
-#    && flutter build apk --release --pub --shrink --target-platform android-arm,android-arm64,android-x64 \
-#    && cd .. && rm -rf warmup
-
-#RUN cd / && find / -xdev | sort > /tmp/after.txt
-
-# Add lables
-LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android-warmed" \
-    description="Alpine with flutter & dart for android, warmed up" \
-    flutter.channel="${FLUTTER_CHANNEL}" \
-    flutter.version="${FLUTTER_VERSION}"
+CMD ["flutter", "doctor"]

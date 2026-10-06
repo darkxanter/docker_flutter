@@ -1,38 +1,26 @@
-# ----------------------------------------------------------------------------------------
-#                                        Dockerfile
-# ----------------------------------------------------------------------------------------
-# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-web
-# repository:  https://github.com/plugfox/docker_flutter
-# license:     MIT
-# requires:
-# + xanter/flutter:<version>
-# authors:
-# + Plague Fox <PlugFox@gmail.com>
-# + Maria Melnik
-# + Dmitri Z <z-dima@live.ru>
-# + DoumanAsh <douman@gmx.se>
-# ----------------------------------------------------------------------------------------
+# syntax=docker/dockerfile:1
+# Adapted from PlugFox/docker_flutter (MIT); see LICENSE.
+ARG FLUTTER_CHANNEL=""
+ARG FLUTTER_VERSION=""
+ARG BASE_IMAGE=xanter/flutter:${FLUTTER_VERSION:-${FLUTTER_CHANNEL:-stable}}
+FROM ${BASE_IMAGE} AS production
 
-ARG FLUTTER_CHANNEL
-ARG FLUTTER_VERSION
+USER root
+RUN set -eux; \
+    curl --fail --location --retry 3 \
+        https://github.com/tdewolff/minify/releases/download/v2.24.19/minify_linux_amd64.tar.gz \
+        --output /tmp/minify.tar.gz; \
+    printf '%s\n' '4439d43ec2c80142d91db7fd2228afe1e2e272f211d2aeb9cd9187a2e5885b5d  /tmp/minify.tar.gz' \
+        | sha256sum --check; \
+    tar -xzf /tmp/minify.tar.gz -C /usr/local/bin minify; \
+    chmod 0755 /usr/local/bin/minify; \
+    rm /tmp/minify.tar.gz
 
-FROM xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}
-
-# Setup flutter tools for web developement
-RUN set -eux; dart --disable-analytics \
-    && flutter config --no-analytics --enable-web \
-    && flutter precache --universal --web
-
-# Add lables
-LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-web" \
-      description="Alpine with flutter & dart for web" \
-      flutter.channel="${FLUTTER_CHANNEL}" \
-      flutter.version="${FLUTTER_VERSION}"
-
-# User by default
 USER flutter
-WORKDIR /
-SHELL [ "/bin/bash", "-c" ]
+RUN flutter config --enable-web && flutter precache --web
 
-# Default command
-CMD [ "flutter", "doctor" ]
+LABEL org.opencontainers.image.title="Flutter Web" \
+    org.opencontainers.image.description="Ubuntu with Flutter web artifacts and minify 2.24.19"
+
+WORKDIR /
+CMD ["flutter", "doctor"]

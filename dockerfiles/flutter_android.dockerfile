@@ -1,108 +1,69 @@
-# ----------------------------------------------------------------------------------------
-#                                        Dockerfile
-# ----------------------------------------------------------------------------------------
-# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android
-# repository:  https://github.com/plugfox/docker_flutter
-# license:     MIT
-# requires:
-# + alpine:latest
-# + xanter/flutter:<version>
-# authors:
-# + Plague Fox <PlugFox@gmail.com>
-# + Maria Melnik
-# + Dmitri Z <z-dima@live.ru>
-# + DoumanAsh <douman@gmx.se>
-# ----------------------------------------------------------------------------------------
-
+# syntax=docker/dockerfile:1
+# Adapted from PlugFox/docker_flutter (MIT); see LICENSE.
 ARG FLUTTER_CHANNEL=""
 ARG FLUTTER_VERSION=""
-ARG ALPINE_VERSION="3.19"
-# ANDROID_SDK_TOOLS_VERSION Comes from https://developer.android.com/studio/#command-tools
-ARG ANDROID_SDK_TOOLS_VERSION=8512546
-ARG ANDROID_HOME="/opt/android"
+ARG BASE_IMAGE=xanter/flutter:${FLUTTER_VERSION:-${FLUTTER_CHANNEL:-stable}}
+ARG UBUNTU_VERSION=24.04
+ARG ANDROID_HOME=/opt/android
+ARG ANDROID_SDK_TOOLS_VERSION=11076708
 
-FROM alpine:$ALPINE_VERSION as build
-
-USER root
-
-ARG ANDROID_PLATFORM_VERSION
-ARG ANDROID_SDK_TOOLS_VERSION
+FROM ubuntu:${UBUNTU_VERSION} AS sdk
 ARG ANDROID_HOME
+ARG ANDROID_SDK_TOOLS_VERSION
 
-WORKDIR /
-
-ENV ANDROID_HOME=$ANDROID_HOME \
-    JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
-    ANDROID_SDK_ROOT=$ANDROID_HOME \
-    ANDROID_TOOLS_ROOT=$ANDROID_HOME \
-    PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
-
-# Install linux dependency and utils
-RUN set -eux; apk --no-cache add bash curl wget unzip openjdk21-jdk \
-    && rm -rf /tmp/* /var/cache/apk/* \
-    && mkdir -p ${ANDROID_HOME}/cmdline-tools /root/.android
-
-# Install the Android SDK Dependency.
-RUN set -eux; wget -q https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS_VERSION}_latest.zip -O /tmp/android-sdk-tools.zip \
-    && unzip -q /tmp/android-sdk-tools.zip -d /tmp/ \
-    && mv /tmp/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest/ \
-    && rm -rf /tmp/* \
-    && touch /root/.android/repositories.cfg \
-    && yes | sdkmanager --sdk_root=${ANDROID_HOME} --licenses \
-    && sdkmanager --sdk_root=${ANDROID_HOME} --install "platform-tools" \
-    && cd / && mv /root /home/
-
-# Create android dependencies
 RUN set -eux; \
-    for f in \
-    ${ANDROID_HOME} \
-    /home \
-    ; do \
-    dir="$(dirname "$f")"; \
-    mkdir -p "/build_android_dependencies$dir"; \
-    cp --archive --link --dereference --no-target-directory "$f" "/build_android_dependencies$f"; \
-    done
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        ca-certificates curl unzip openjdk-21-jdk-headless; \
+    rm -rf /var/lib/apt/lists/*; \
+    mkdir -p "${ANDROID_HOME}/cmdline-tools"; \
+    curl --fail --location --retry 3 \
+        "https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS_VERSION}_latest.zip" \
+        --output /tmp/android-tools.zip; \
+    unzip -q /tmp/android-tools.zip -d /tmp; \
+    mv /tmp/cmdline-tools "${ANDROID_HOME}/cmdline-tools/latest"; \
+    rm /tmp/android-tools.zip
 
-# Create new clear layer
-FROM xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION} as production
-
+FROM ${BASE_IMAGE} AS production
 USER root
-
-ARG FLUTTER_CHANNEL
-ARG FLUTTER_VERSION
-ARG ANDROID_SDK_TOOLS_VERSION
 ARG ANDROID_HOME
+ARG ANDROID_SDK_TOOLS_VERSION
+ARG ANDROID_PLATFORM_VERSION=36
+ARG ANDROID_BUILD_TOOLS_VERSION=36.0.0
 
-# Add enviroment variables
-ENV ANDROID_HOME=$ANDROID_HOME \
+ENV ANDROID_HOME=${ANDROID_HOME} \
+    ANDROID_SDK_ROOT=${ANDROID_HOME} \
+    ANDROID_TOOLS_ROOT=${ANDROID_HOME} \
+    ANDROID_SDK_TOOLS_VERSION=${ANDROID_SDK_TOOLS_VERSION} \
+    ANDROID_PLATFORM_VERSION=${ANDROID_PLATFORM_VERSION} \
+    ANDROID_BUILD_TOOLS_VERSION=${ANDROID_BUILD_TOOLS_VERSION} \
     JAVA_HOME=/usr/lib/jvm/java-21-openjdk \
-    ANDROID_SDK_ROOT=$ANDROID_HOME \
-    ANDROID_TOOLS_ROOT=$ANDROID_HOME \
     PATH="${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools"
 
-# Copy android dependencies
-COPY --chown=101:101 --from=build /build_android_dependencies/ /
+COPY --from=sdk --chown=101:101 ${ANDROID_HOME}/ ${ANDROID_HOME}/
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends openjdk-21-jdk-headless; \
+    rm -rf /var/lib/apt/lists/*; \
+    ln -s "$(dirname "$(dirname "$(readlink -f /usr/bin/javac)")")" "${JAVA_HOME}"
 
-#RUN mkdir -p /tmp && find / -xdev | sort > /tmp/before.txt
-
-# Init android dependency and utils
-RUN set -eux; apk add --no-cache openjdk21-jdk \
-    && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
-    /usr/share/man/* /usr/share/doc
-
-#RUN find / -xdev | sort > /tmp/after.txt
-
-# Add lables
-LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}-android" \
-    description="Alpine with flutter & dart for android" \
-    flutter.channel="${FLUTTER_CHANNEL}" \
-    flutter.version="${FLUTTER_VERSION}" \
-    android.home="${ANDROID_HOME}"
-
-# User by default
 USER flutter
 WORKDIR /home
-SHELL [ "/bin/bash", "-c" ]
+RUN set -eux; \
+    mkdir -p /home/.android; \
+    touch /home/.android/repositories.cfg; \
+    printf 'y\n%.0s' {1..100} | sdkmanager --sdk_root="${ANDROID_HOME}" --licenses; \
+    sdkmanager --sdk_root="${ANDROID_HOME}" --install \
+        'platform-tools' "platforms;android-${ANDROID_PLATFORM_VERSION}" \
+        "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"; \
+    flutter config --enable-android; \
+    flutter precache --android; \
+    sdkmanager --list_installed > /home/sdkmanager-list-installed.txt
 
-# Default command
-CMD [ "flutter", "doctor" ]
+LABEL org.opencontainers.image.title="Flutter Android" \
+    org.opencontainers.image.description="Ubuntu with Flutter, Android SDK and OpenJDK 21" \
+    android.home="${ANDROID_HOME}" \
+    android.platform="${ANDROID_PLATFORM_VERSION}" \
+    android.build-tools="${ANDROID_BUILD_TOOLS_VERSION}"
+
+CMD ["flutter", "doctor"]

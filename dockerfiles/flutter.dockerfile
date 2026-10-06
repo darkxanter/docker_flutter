@@ -1,169 +1,64 @@
-# ----------------------------------------------------------------------------------------
-#                                        Dockerfile
-# ----------------------------------------------------------------------------------------
-# image:       xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}
-# repository:  https://github.com/plugfox/docker_flutter
-# license:     MIT
-# requires:
-# + alpine:latest
-# authors:
-# + Plague Fox <PlugFox@gmail.com>
-# + Maria Melnik
-# + Dmitri Z <z-dima@live.ru>
-# + DoumanAsh <douman@gmx.se>
-# ----------------------------------------------------------------------------------------
+# syntax=docker/dockerfile:1
+# Adapted from PlugFox/docker_flutter (MIT); see LICENSE.
+ARG UBUNTU_VERSION=24.04
+FROM ubuntu:${UBUNTU_VERSION} AS production
+
+ARG FLUTTER_HOME=/opt/flutter
+ARG PUB_CACHE=/var/tmp/.pub_cache
+
+ENV FLUTTER_HOME=${FLUTTER_HOME} \
+    FLUTTER_ROOT=${FLUTTER_HOME} \
+    PUB_CACHE=${PUB_CACHE} \
+    HOME=/home \
+    PATH="${PATH}:${FLUTTER_HOME}/bin:${PUB_CACHE}/bin"
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN set -eux; \
+    apt-get update; \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        bash ca-certificates curl git unzip xz-utils zip sudo libstdc++6 \
+        sqlite3 libsqlite3-dev; \
+    rm -rf /var/lib/apt/lists/*; \
+    if getent passwd 101 || getent group 101; then \
+        echo 'UID/GID 101 is already allocated; cannot create flutter' >&2; exit 1; \
+    fi; \
+    groupadd --gid 101 flutter; \
+    useradd --uid 101 --gid 101 --home-dir /home --no-create-home --shell /bin/bash flutter; \
+    mkdir -p "${FLUTTER_HOME}" "${PUB_CACHE}" /home; \
+    chown -R 101:101 "${FLUTTER_HOME}" "${PUB_CACHE}" /home; \
+    printf '%s\n' 'flutter ALL=(ALL:ALL) NOPASSWD: ALL' > /etc/sudoers.d/flutter; \
+    chmod 0440 /etc/sudoers.d/flutter
+
+USER flutter
+WORKDIR /home
 
 ARG FLUTTER_CHANNEL=""
 ARG FLUTTER_VERSION=""
-ARG FLUTTER_HOME="/opt/flutter"
-ARG PUB_CACHE="/var/tmp/.pub_cache"
-ARG FLUTTER_URL="https://github.com/flutter/flutter"
-# "2.34-r0" - does not properly work
-ARG GLIBC_VERSION="2.35-r1"
-ARG GLIBC_URL="https://github.com/sgerrand/alpine-pkg-glibc"
-ARG ALPINE_VERSION="3.19"
+ARG FLUTTER_REVISION=""
+ARG FLUTTER_URL=https://github.com/flutter/flutter.git
 
-FROM alpine:$ALPINE_VERSION as build
-
-USER root
-
-ARG FLUTTER_CHANNEL
-ARG FLUTTER_VERSION
-ARG FLUTTER_HOME
-ARG PUB_CACHE
-ARG FLUTTER_URL
-ARG GLIBC_VERSION
-ARG GLIBC_URL
-ARG ALPINE_VERSION
-
-WORKDIR /
-
-ENV GLIBC_VERSION=$GLIBC_VERSION \
-    FLUTTER_CHANNEL=$FLUTTER_CHANNEL \
-    FLUTTER_VERSION=$FLUTTER_VERSION \
-    FLUTTER_HOME=$FLUTTER_HOME \
-    PUB_CACHE=$PUB_CACHE \
-    FLUTTER_ROOT=$FLUTTER_HOME \
-    PATH="${PATH}:${FLUTTER_HOME}/bin:${PUB_CACHE}/bin"
-
-#RUN mkdir -p /tmp && find / -xdev | sort > /tmp/before.txt
-
-# Install linux dependency and utils
-RUN set -eux; mkdir -p /usr/lib /tmp/glibc $PUB_CACHE \
-    && apk --no-cache add bash curl git ca-certificates wget unzip \
-    && wget -q -O /etc/apk/keys/sgerrand.rsa.pub \
-    https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
-    && wget -O /tmp/glibc/glibc.apk \
-    ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk \
-    && wget -O /tmp/glibc/glibc-bin.apk \
-    ${GLIBC_URL}/releases/download/${GLIBC_VERSION}/glibc-bin-${GLIBC_VERSION}.apk \
-    && rm -rf /var/lib/apt/lists/* /var/cache/apk/* \
-    && echo "flutter:x:101:flutter" >> /etc/group \
-    && echo "flutter:x:101:101:Flutter user,,,:/home:/sbin/nologin" >> /etc/passwd
-
-#RUN find / -xdev | sort > /tmp/after.txt
-
-# Install & config Flutter
-# Убрал --no-tags тк флатер не может получить текущую версию
-RUN set -eux; if [[ -z "$FLUTTER_VERSION" ]] ; then \
-    git clone -b ${FLUTTER_CHANNEL} --depth 1 "${FLUTTER_URL}.git" "${FLUTTER_ROOT}" ; \
-    else \
-    git clone -b ${FLUTTER_VERSION} --depth 1 "${FLUTTER_URL}.git" "${FLUTTER_ROOT}" ; \
-    fi \
-    && cd "${FLUTTER_ROOT}" \
-    && git gc --prune=all \
-    && cd / \
-    && mv /root /home/
-
-# Create system dependencies
-RUN set -eux; for f in \
-    /etc/ssl/certs \
-    /usr/share/ca-certificates \
-    /etc/apk/keys \
-    /etc/group \
-    /etc/passwd \
-    ; do \
-    dir="$(dirname "$f")"; \
-    mkdir -p "/build_system_dependencies$dir"; \
-    cp --archive --link --dereference --no-target-directory "$f" "/build_system_dependencies$f"; \
-    done
-
-# Create flutter dependencies
+# The resolved revision invalidates this layer when a channel advances.
 RUN set -eux; \
-    for f in \
-    ${FLUTTER_HOME} \
-    ${PUB_CACHE} \
-    /home \
-    /tmp/glibc \
-    ; do \
-    dir="$(dirname "$f")"; \
-    mkdir -p "/build_flutter_dependencies$dir"; \
-    cp --archive --link --dereference --no-target-directory "$f" "/build_flutter_dependencies$f"; \
-    done
+    git clone --branch "${FLUTTER_VERSION:-${FLUTTER_CHANNEL:-stable}}" --depth 1 \
+        "${FLUTTER_URL}" "${FLUTTER_HOME}"; \
+    if [ -n "${FLUTTER_REVISION}" ]; then \
+        test "$(git -C "${FLUTTER_HOME}" rev-parse HEAD)" = "${FLUTTER_REVISION}"; \
+    fi; \
+    git -C "${FLUTTER_HOME}" gc --prune=all; \
+    dart --disable-analytics; \
+    flutter config --no-analytics --no-cli-animations; \
+    flutter precache --universal
 
-# Create new clear layer
-FROM alpine:$ALPINE_VERSION as production
-
-ARG FLUTTER_CHANNEL
-ARG FLUTTER_VERSION
-ARG FLUTTER_HOME
-ARG PUB_CACHE
-ARG FLUTTER_URL
-ARG GLIBC_VERSION
-ARG GLIBC_URL
-ARG ALPINE_VERSION
-
-# Add enviroment variables
-ENV FLUTTER_HOME=$FLUTTER_HOME \
-    PUB_CACHE=$PUB_CACHE \
-    FLUTTER_ROOT=$FLUTTER_HOME \
-    PATH="${PATH}:${FLUTTER_HOME}/bin:${PUB_CACHE}/bin"
-
-# Copy system dependencies
-COPY --from=build /build_system_dependencies/ /
-
-# Copy flutter dependencies
-COPY --chown=101:101 --from=build /build_flutter_dependencies/ /
-
-# Install linux dependency and utils
-RUN set -eux; apk --no-cache add --force-overwrite bash git curl unzip sudo sqlite sqlite-libs \
-    /tmp/glibc/glibc.apk \
-    /tmp/glibc/glibc-bin.apk \
-    && ln -s libsqlite3.so.0 /usr/lib/libsqlite3.so \
-    && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
-    /usr/share/man/* /usr/share/doc \
-    && echo "flutter ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/flutter
-#&& git config --global user.email "flutter@dart.dev" \
-#&& git config --global user.name "Flutter" \
-#&& git config --global --add safe.directory /opt/flutter
-
-#ENV BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-
-# Add lables
-LABEL name="xanter/flutter:${FLUTTER_CHANNEL}${FLUTTER_VERSION}" \
-    description="Alpine OS with flutter & dart" \
-    license="MIT" \
-    vcs-type="git" \
-    vcs-url="https://github.com/xanter/docker_flutter" \
-    github="https://github.com/xanter/docker_flutter" \
-    dockerhub="https://hub.docker.com/r/xanter/flutter" \
-    # maintainer="Plague Fox <plugfox@gmail.com>" \
-    authors="@PlugFox,@DoumanAsh,@MariaMelnik,@zs-dima,@darkxanter" \
-    user="flutter" \
-    group="flutter" \
+LABEL org.opencontainers.image.title="Flutter" \
+    org.opencontainers.image.description="Ubuntu 24.04 with Flutter, Dart and SQLite" \
+    org.opencontainers.image.source="https://github.com/darkxanter/docker_flutter" \
+    org.opencontainers.image.licenses="MIT" \
     family="xanter/flutter" \
-    glibc.version="${GLIBC_VERSION}" \
-    glibc.url="${GLIBC_URL}" \
     flutter.channel="${FLUTTER_CHANNEL}" \
     flutter.version="${FLUTTER_VERSION}" \
+    flutter.revision="${FLUTTER_REVISION}" \
     flutter.home="${FLUTTER_HOME}" \
-    flutter.cache="${PUB_CACHE}" \
-    flutter.url="${FLUTTER_URL}"
+    flutter.cache="${PUB_CACHE}"
 
-# User by default
-USER flutter
-WORKDIR /home
-SHELL [ "/bin/bash", "-c" ]
-
-# Default command
-CMD [ "flutter", "doctor" ]
+CMD ["flutter", "doctor"]

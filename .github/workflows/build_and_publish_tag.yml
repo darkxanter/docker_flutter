@@ -6,26 +6,45 @@ on:
       version:
         description: 'Flutter version from https://github.com/flutter/flutter/tags'
         required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flutter-images
+  cancel-in-progress: false
+
+env:
+  IMAGE_REPOSITORY: xanter/flutter
+  CI_CACHE: 'true'
 
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v3
-
-      - name: ✨ Log into registry
-        run: echo "${{ secrets.DOCKER_LOGIN_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_LOGIN_USERNAME }} --password-stdin
-
-      - name: 🐈 Pull alpine:latest
-        run: docker pull alpine:latest
-
-      - name: 🏗️ Build images
-        run: make build FLUTTER_VERSION="${{ github.event.inputs.version }}"
-
-      - name: 🔥 Push images to registry
-        run: make push FLUTTER_VERSION="${{ github.event.inputs.version }}"
-
-      - name: 🗑️ Prune images
-        run: make prune
-
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Resolve Flutter version
+        env:
+          FLUTTER_VERSION: ${{ inputs.version }}
+        run: bash tools/image.sh resolve >> "$GITHUB_ENV"
+      - name: Validate build configuration
+        run: |
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          docker compose config --quiet
+      - name: Build and load all variants
+        uses: docker/bake-action@v6
+        with:
+          files: docker-bake.hcl
+          load: true
+      - name: Verify images
+        run: make check
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_LOGIN_USERNAME }}
+          password: ${{ secrets.DOCKER_LOGIN_PASSWORD }}
+      - name: Publish checked images
+        run: make push

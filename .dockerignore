@@ -1,0 +1,12 @@
+.git
+.github
+.opencode
+.idea
+.vscode
+.superpowers
+dockerfiles/index
+docs
+**/__pycache__
+**/.dart_tool
+**/build
+**/*.log

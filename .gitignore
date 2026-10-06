@@ -4,3 +4,9 @@
 **.bat
 **.cmd
 **.ps1
+!tools/image.sh
+!tools/verify_images.sh
+**/__pycache__/
+**/.dart_tool/
+**/build/
+.superpowers/

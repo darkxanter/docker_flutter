@@ -1,132 +1,49 @@
-# HOW TO BUILD STABLE:
-# docker compose -f ./docker-compose.yml build --compress --parallel flutter-stable \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel flutter-stable-web flutter-stable-android \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel flutter-stable-android-warmed
-#
-# HOW TO BUILD BETA:
-# docker compose -f ./docker-compose.yml build --compress --parallel flutter-beta \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel flutter-beta-web flutter-beta-android \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel flutter-beta-android-warmed
-#
-# HOW TO BUILD MASTER:
-# docker compose -f ./docker-compose.yml build --compress --parallel flutter-master \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel flutter-master-web flutter-master-android \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel flutter-master-android-warmed
-#
-# HOW TO BUILD AND PUSH ALL:
-# docker compose -f ./docker-compose.yml build --compress --parallel \
-#     flutter-stable flutter-beta flutter-master \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel \
-#     flutter-stable-web flutter-stable-android flutter-beta-web flutter-beta-android flutter-master-web flutter-master-android \
-#   && docker compose -f ./docker-compose.yml build --compress --parallel \
-#     flutter-stable-android-warmed flutter-beta-android-warmed flutter-master-android-warmed \
-#   && docker compose push
-
-version: "3.9"
-
+# Requires Docker Compose 2.17+ for service build contexts.
+# Build the complete stable chain: docker compose build
+# For revision-aware builds and release tags, use make build instead.
 services:
-
-  #############################################################
-  # STABLE
-
   flutter-stable:
-    image: xanter/flutter:stable
+    image: ${IMAGE_REPOSITORY:-xanter/flutter}:stable
+    platform: linux/amd64
     build:
-      dockerfile: dockerfiles/flutter.dockerfile
       context: .
+      dockerfile: dockerfiles/flutter.dockerfile
       args:
-        - FLUTTER_CHANNEL=stable
+        FLUTTER_CHANNEL: stable
+        FLUTTER_REVISION: ${FLUTTER_REVISION:-}
 
   flutter-stable-web:
-    image: xanter/flutter:stable-web
+    image: ${IMAGE_REPOSITORY:-xanter/flutter}:stable-web
+    platform: linux/amd64
     build:
-      dockerfile: dockerfiles/flutter_web.dockerfile
       context: .
+      dockerfile: dockerfiles/flutter_web.dockerfile
       args:
-        - FLUTTER_CHANNEL=stable
+        BASE_IMAGE: flutter-base
+      additional_contexts:
+        flutter-base: service:flutter-stable
 
   flutter-stable-android:
-    image: xanter/flutter:stable-android
+    image: ${IMAGE_REPOSITORY:-xanter/flutter}:stable-android
+    platform: linux/amd64
     build:
-      dockerfile: dockerfiles/flutter_android.dockerfile
       context: .
+      dockerfile: dockerfiles/flutter_android.dockerfile
       args:
-        - FLUTTER_CHANNEL=stable
+        BASE_IMAGE: flutter-base
+        ANDROID_SDK_TOOLS_VERSION: ${ANDROID_SDK_TOOLS_VERSION:-11076708}
+        ANDROID_PLATFORM_VERSION: ${ANDROID_PLATFORM_VERSION:-36}
+        ANDROID_BUILD_TOOLS_VERSION: ${ANDROID_BUILD_TOOLS_VERSION:-36.0.0}
+      additional_contexts:
+        flutter-base: service:flutter-stable
 
   flutter-stable-android-warmed:
-    image: xanter/flutter:stable-android-warmed
+    image: ${IMAGE_REPOSITORY:-xanter/flutter}:stable-android-warmed
+    platform: linux/amd64
     build:
-      dockerfile: dockerfiles/flutter_android_warmed.dockerfile
       context: .
+      dockerfile: dockerfiles/flutter_android_warmed.dockerfile
       args:
-        - FLUTTER_CHANNEL=stable
-
-  #############################################################
-  # BETA
-
-  # flutter-beta:
-  #   image: xanter/flutter:beta
-  #   build:
-  #     dockerfile: dockerfiles/flutter.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=beta
-
-  # flutter-beta-web:
-  #   image: xanter/flutter:beta-web
-  #   build:
-  #     dockerfile: dockerfiles/flutter_web.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=beta
-
-  # flutter-beta-android:
-  #   image: xanter/flutter:beta-android
-  #   build:
-  #     dockerfile: dockerfiles/flutter_android.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=beta
-
-  # flutter-beta-android-warmed:
-  #   image: xanter/flutter:beta-android-warmed
-  #   build:
-  #     dockerfile: dockerfiles/flutter_android_warmed.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=beta
-
-  #############################################################
-  # MASTER
-
-  # flutter-master:
-  #   image: xanter/flutter:master
-  #   build:
-  #     dockerfile: dockerfiles/flutter.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=master
-
-  # flutter-master-web:
-  #   image: xanter/flutter:master-web
-  #   build:
-  #     dockerfile: dockerfiles/flutter_web.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=master
-
-  # flutter-master-android:
-  #   image: xanter/flutter:master-android
-  #   build:
-  #     dockerfile: dockerfiles/flutter_android.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=master
-
-  # flutter-master-android-warmed:
-  #   image: xanter/flutter:master-android-warmed
-  #   build:
-  #     dockerfile: dockerfiles/flutter_android_warmed.dockerfile
-  #     context: .
-  #     args:
-  #       - FLUTTER_CHANNEL=master
+        BASE_IMAGE: flutter-android
+      additional_contexts:
+        flutter-android: service:flutter-stable-android
