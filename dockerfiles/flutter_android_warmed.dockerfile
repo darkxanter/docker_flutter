@@ -31,13 +31,14 @@ RUN set -eux; cd "${FLUTTER_HOME}/bin" \
     && dart --disable-analytics \
     && flutter config --no-analytics --enable-android \
     && flutter precache --universal --android \
-    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'extras;google;instantapps' \ 
+    && sdkmanager --sdk_root=${ANDROID_HOME} --install 'extras;google;instantapps' \
+    'platforms;android-36' \
     'platforms;android-35' \
     'platforms;android-34' \
-    'platforms;android-33' \ 
-    'platforms;android-32' \ 
-    'platforms;android-31' \ 
-    'platforms;android-30' \ 
+    'platforms;android-33' \
+    'platforms;android-32' \
+    'platforms;android-31' \
+    'platforms;android-30' \
     'platforms;android-29' \
     'platforms;android-28' \
     && cd /home \

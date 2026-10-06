@@ -126,9 +126,10 @@ COPY --from=build /build_system_dependencies/ /
 COPY --chown=101:101 --from=build /build_flutter_dependencies/ /
 
 # Install linux dependency and utils
-RUN set -eux; apk --no-cache add --force-overwrite bash git curl unzip sudo \
+RUN set -eux; apk --no-cache add --force-overwrite bash git curl unzip sudo sqlite sqlite-libs \
     /tmp/glibc/glibc.apk \
     /tmp/glibc/glibc-bin.apk \
+    && ln -s libsqlite3.so.0 /usr/lib/libsqlite3.so \
     && rm -rf /tmp/* /var/lib/apt/lists/* /var/cache/apk/* \
     /usr/share/man/* /usr/share/doc \
     && echo "flutter ALL=(ALL:ALL) NOPASSWD: ALL" >> /etc/sudoers.d/flutter
