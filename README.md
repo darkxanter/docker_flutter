@@ -116,6 +116,10 @@ Use `IMAGE_REPOSITORY=localhost/flutter-check` on both commands to keep verifica
 
 `make check` runs SQLite/code-generation tests, verifies Java and warmed caches, and builds a web fixture. The warmed image's Docker build itself compiles a release APK for all three Android architectures. These checks require network access for fixture dependencies.
 
+The smoke fixture resolves SDK-compatible generator versions before enforcing its
+lockfile. Code generation is limited to five minutes; the complete image-verification
+step in GitHub Actions is limited to twenty minutes.
+
 ```sh
 make shell FLUTTER_VERSION=3.35.7   # Mount this directory at /workspace
 make demo FLUTTER_VERSION=3.35.7    # Build a disposable Android demo

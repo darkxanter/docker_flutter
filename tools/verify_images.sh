@@ -25,15 +25,21 @@ sha256sum pubspec.lock > lock.sha256
 sudo chown root:root pubspec.lock
 sudo chmod 666 pubspec.lock
 sudo touch -t 200001010000 pubspec.lock
-if flutter pub run build_runner build --delete-conflicting-outputs > ownership.log 2>&1; then
+if timeout --verbose --kill-after=10s 5m flutter pub run build_runner build --delete-conflicting-outputs > ownership.log 2>&1; then
     printf 'Expected root-owned lockfile mtime update to fail\n' >&2
     exit 1
+else
+    status=$?
+    if [[ "$status" == 124 || "$status" == 137 ]]; then
+        cat ownership.log >&2
+        exit "$status"
+    fi
 fi
 grep -F 'Failed to set file modification time' ownership.log
 sudo chown "$(id -u):$(id -g)" pubspec.lock
 
 flutter pub get --enforce-lockfile
-flutter pub run build_runner build --delete-conflicting-outputs
+timeout --verbose --kill-after=10s 5m flutter pub run build_runner build --delete-conflicting-outputs
 flutter test --no-pub --test-randomize-ordering-seed random
 sha256sum --check lock.sha256
 BASE
